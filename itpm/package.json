@@ -1,0 +1,16 @@
+{
+  "name": "singlish-translator-testing",
+  "version": "1.0.0",
+  "description": "Hostel management system",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [
+    "hostel",
+    "management",
+    "react",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {}
+}
