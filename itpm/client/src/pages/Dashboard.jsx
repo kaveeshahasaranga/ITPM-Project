@@ -39,7 +39,7 @@ export default function Dashboard() {
           apiFetch("/notifications?unread=true"),
           apiFetch("/notices")
         ]);
-        setAdminStats(stats);
+        setAdminStats(stats);;
         setStudentNotices(notices);
         const recoveries = notifications.filter(n => n.type === "password-recovery");
         const others = notifications.filter(n => n.type !== "password-recovery");
