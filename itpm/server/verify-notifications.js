@@ -47,27 +47,7 @@ async function verify() {
         // );
 
         // We execute the same query here
-        const result = await Notification.updateMany(
-            {
-                read: false,
-                $or: [
-                    { role: "student", recipientId: null },
-                    { recipientId: student._id }
-                ]
-            },
-            { $set: { read: true } }
-        );
-        console.log("Marked as read, modified:", result.modifiedCount);
-
-        // 4. Verify it is read
-        found = await Notification.findById(notif._id);
-        if (found.read) console.log("✅ Notification is now read");
-        else console.log("❌ Notification should be read");
-
-        // Cleanup
-        await Notification.deleteMany({ _id: notif._id });
-        console.log("Cleanup done");
-
+        
     } catch (err) {
         console.error(err);
     } finally {

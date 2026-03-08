@@ -1,187 +1,108 @@
-# SwiftTranslator Test Automation Suite
+# HostelMate
 
-This project contains automated tests for the SwiftTranslator Singlish to Sinhala conversion system using Playwright.
+HostelMate is a comprehensive hostel management system that simplifies accommodation and resource management. It provides dedicated portals for both administrators and students.
 
-## Project Overview
+## Project Structure
 
-This test suite validates the functionality of the SwiftTranslator web application by testing:
-- 24 positive functional scenarios
-- 10 negative functional scenarios  
-- 1 UI-related test scenario
+The repository contains two main directories:
+- `client/`: The React frontend application (built with Vite)
+- `server/`: The Node.js/Express backend API
 
-## Prerequisites
+## Tech Stack
 
-Before running the tests, ensure you have the following installed:
-- Node.js (version 16 or higher)
-- npm (comes with Node.js)
+### Frontend
+- **React 18**
+- **Vite**
+- **React Router** for navigation
+- **Heroicons** for UI icons
+- **Cypress** for frontend testing
 
-## Installation
+### Backend
+- **Node.js & Express**
+- **MongoDB & Mongoose** for database
+- **JWT (JSON Web Tokens)** for authentication
+- **Bcrypt.js** for password hashing
+- **Express Rate Limit** and **Helmet.js** for API security
+- **Nodemailer** for email notifications
 
-### Step 1: Clone or Download the Repository
+## Setup Instructions
 
-If you have the project as a zip file, extract it. If it's a Git repository:
+### Prerequisites
+- Node.js (v18 or higher recommended)
+- MongoDB running locally or a MongoDB Atlas URI
 
+### 1. Server Setup
+
+Navigate to the server directory:
 ```bash
-git clone <repository-url>
-cd <project-directory>
+cd server
 ```
 
-### Step 2: Install Dependencies
-
-Run the following command in the project root directory:
-
+Install dependencies:
 ```bash
 npm install
 ```
 
-### Step 3: Install Playwright Browsers
+Set up your `.env` file in the server directory. At a minimum, you'll need:
+```env
+PORT=4000
+MONGODB_URI=mongodb://localhost:27017/hostelmate
+JWT_SECRET=your_jwt_secret
+```
 
-After installing dependencies, install the required browsers:
-
+Optionally, you can seed the database with initial data:
 ```bash
-npx playwright install chromium
+npm run seed
 ```
 
-## Project Structure
-
-```
-.
-├── swift-translator-tests.spec.js    # Main test file
-├── playwright.config.js              # Playwright configuration
-├── package.json                      # Project dependencies
-└── README.md                         # This file
-```
-
-## Running the Tests
-
-### Run All Tests
-
+Start the development server:
 ```bash
-npm test
+npm run dev
 ```
 
-### Run Tests in Headed Mode (visible browser)
+### 2. Client Setup
 
+Open a new terminal and navigate to the client directory:
 ```bash
-npm run test:headed
+cd client
 ```
 
-### Run Tests with UI Mode (interactive)
-
+Install dependencies:
 ```bash
-npm run test:ui
+npm install
 ```
 
-### Run Tests in Debug Mode
-
+Start the frontend development server:
 ```bash
-npm run test:debug
+npm run dev
 ```
 
-### View Test Report
+The frontend application will run on Vite's default port (`http://localhost:5173`).
 
-After running tests, view the HTML report:
+## Features
 
-```bash
-npm run report
-```
+### Student Features
+- Register an account (requires admin approval)
+- Submit and track maintenance requests (e.g., Plumbing, Electrical)
+- Make and track resource bookings
+- Update profile information
 
-## Test Coverage
+### Admin Features
+- Manage and approve pending student registrations
+- View and manage all system maintenance requests
+- Oversee resource bookings across the hostel
+- Secure admin login flow
 
-### Positive Functional Tests (24 scenarios)
+## API & Guides
 
-The test suite covers:
-- **Sentence Structures**: Simple, compound, and complex sentences
-- **Question Forms**: Various interrogative patterns
-- **Command Forms**: Direct and polite imperatives
-- **Tense Variations**: Past, present, and future tenses
-- **Negations**: Different negative sentence forms
-- **Greetings & Responses**: Common conversational patterns
-- **Mixed Language**: English terms embedded in Singlish
-- **Punctuation**: Special characters and formatting
-- **Numbers & Currency**: Numerical formats and currency
+For detailed information on the specific endpoints, please refer to the [API Documentation](./API_DOCUMENTATION.md).
 
-### Negative Functional Tests (10 scenarios)
+Additional documentation:
+- [Testing Report](./TESTING_REPORT.md)
+- [Manual Testing Guide](./MANUAL_TESTING_GUIDE.md)
+- [Validation Guide](./VALIDATION_GUIDE.md)
+- [System Improvements](./SYSTEM_IMPROVEMENTS.md)
+- [Login Credentials](./LOGIN_CREDENTIALS.md)
 
-Tests for robustness including:
-- Missing spaces between words
-- Multiple consecutive spaces
-- Line breaks in input
-- Informal slang expressions
-- Mixed language with formatting errors
-- Abbreviations and technical terms
-- Typographical errors
-
-### UI Test (1 scenario)
-
-- Real-time output update validation
-- Tests that translation appears dynamically as user types
-
-## Test Data Structure
-
-Each test case includes:
-- **Test Case ID**: Unique identifier (e.g., Pos_Fun_001)
-- **Name**: Descriptive test name
-- **Input**: Singlish text to translate
-- **Expected Output**: Expected Sinhala translation
-- **Category**: Test category (e.g., Daily language usage)
-- **Grammar**: Grammar focus (e.g., Simple sentence)
-- **Length**: Input length type (S/M/L)
-
-## Configuration
-
-Test timeouts and settings can be modified in `playwright.config.js`:
-- Default timeout: 60 seconds
-- Expect timeout: 10 seconds
-- Retries: 0 (can be increased for flaky tests)
-- Workers: 1 (sequential execution)
-
-## Troubleshooting
-
-### Tests Failing
-
-1. **Network Issues**: Ensure stable internet connection
-2. **Site Changes**: Website structure may have changed - verify selectors
-3. **Timeout Errors**: Increase timeout values in config or test files
-
-### Installation Issues
-
-1. **Node.js Version**: Ensure you're using Node.js 16+
-   ```bash
-   node --version
-   ```
-
-2. **Clear Cache**: If having npm issues
-   ```bash
-   npm cache clean --force
-   npm install
-   ```
-
-### Browser Issues
-
-If Playwright browsers aren't working:
-```bash
-npx playwright install --force chromium
-```
-
-## Test Results
-
-Test results are saved in the `test-results/` directory:
-- HTML report: `test-results/html-report/`
-- JSON results: `test-results/test-results.json`
-- Screenshots/Videos: `test-results/artifacts/`
-
-## Notes
-
-- Tests run sequentially (workers: 1) to avoid conflicts
-- Each test waits 2 seconds between executions for stability
-- Screenshots and videos are captured only on failure
-- All tests use the same base URL configured in `playwright.config.js`
-
-## License
-
-This project is for educational purposes as part of IT3040 - ITPM assignment.
-
-## Author
-
-BSc (Hons) in Information Technology - Year 3 Student
+---
+*Developed for the IT3040 - ITPM assignment.*
