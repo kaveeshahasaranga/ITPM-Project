@@ -41,12 +41,4 @@ const userSchema = new mongoose.Schema(
 );
 
 // Compound index for common queries
-userSchema.index({ role: 1, status: 1 });
 
-userSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-  delete obj.passwordHash;
-  return obj;
-};
-
-export default mongoose.model("User", userSchema);
