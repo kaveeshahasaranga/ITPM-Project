@@ -4,7 +4,13 @@ import { requireAuth, requireApproved } from "../middleware/auth.js";
 import Booking from "../models/Booking.js";
 import Resource from "../models/Resource.js";
 
+const router = Router();
 
+const bookingSchema = z.object({
+  resourceName: z.string().min(2).max(100),
+  start: z.string().datetime("Invalid start date format"),
+  end: z.string().datetime("Invalid end date format")
+});
 
 const validateBookingTime = (data) => {
   const start = new Date(data.start);
