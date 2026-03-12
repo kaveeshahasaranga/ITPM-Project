@@ -28,7 +28,30 @@ router.post("/", requireAuth, requireApproved, async (req, res) => {
         let isStudentToAdmin = true;
         let finalRecipientId = recipientId;
 
-        
+        if (senderRole === "admin") {
+            messageType = "reply";
+            isStudentToAdmin = false;
+            if (!recipientId) {
+                return res.status(400).json({ message: "Recipient ID required for admin messages" });
+            }
+            // Verify recipient exists
+            const recipient = await User.findById(recipientId);
+            if (!recipient) {
+                return res.status(404).json({ message: "Recipient not found" });
+            }
+        } else {
+            // Student sending to admin
+            finalRecipientId = undefined; // Goes to all admins conceptually, or handled by notification
+        }
+
+        const message = await Message.create({
+            sender: senderId,
+            recipient: finalRecipientId,
+            content,
+            type: messageType,
+            isStudentToAdmin
+        });
+
         // Create Notification
         if (isStudentToAdmin) {
             // Notify all admins
