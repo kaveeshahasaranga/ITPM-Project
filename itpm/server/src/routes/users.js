@@ -21,6 +21,20 @@ router.get("/me", requireAuth, requireApproved, async (req, res) => {
   });
 });
 
+const updateSchema = z.object({
+  name: z.string().min(2).max(50).regex(/^[a-zA-Z\s]+$/, "Name must contain only letters and spaces").optional(),
+  phone: z.string().length(10).regex(/^[0-9]+$/, "Phone must be 10 digits").optional(),
+  emergencyContact: z.string().length(10).regex(/^[0-9]+$/, "Emergency contact must be 10 digits").optional(),
+  emergencyContactName: z.string().min(2).max(50).regex(/^[a-zA-Z\s]+$/, "Emergency contact name must contain only letters and spaces").optional(),
+  monthlySalary: z.number().min(0).max(999999).optional(),
+  faculty: z.string().min(1).max(50).optional(),
+  year: z.string().min(1).max(20).optional(),
+  visitorNumber: z.string().min(1).max(50).optional(),
+  walletBalance: z.number().min(0).max(10000000).optional(),
+  paymentCardHolderName: z.string().min(2).max(50).regex(/^[a-zA-Z\s]+$/, "Card holder name must contain only letters and spaces").optional(),
+  paymentCardBrand: z.string().min(2).max(20).optional(),
+  paymentCardNumber: z.string().regex(/^\d{12,19}$/, "Card number must be 12-19 digits").optional()
+});
 
 router.put("/me", requireAuth, requireApproved, async (req, res) => {
   const parse = updateSchema.safeParse(req.body);
