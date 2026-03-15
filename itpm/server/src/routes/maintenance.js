@@ -34,7 +34,19 @@ router.post("/", requireAuth, requireApproved, async (req, res) => {
   res.status(201).json(item);
 });
 
+router.get("/", requireAuth, requireApproved, async (req, res) => {
+  if (req.user.role === "admin") {
+    const all = await MaintenanceRequest.find().populate("studentId", "name email");
+    return res.json(all);
+  }
+  const mine = await MaintenanceRequest.find({ studentId: req.user._id });
+  res.json(mine);
+});
 
+const updateSchema = z.object({
+  category: z.enum(["Water", "Electricity", "Wi-Fi", "Furniture", "Plumbing", "HVAC", "Appliances"]).optional(),
+  description: z.string().min(5).max(500).optional()
+});
 
 router.patch("/:id", requireAuth, requireApproved, async (req, res) => {
   const parse = updateSchema.safeParse(req.body);
