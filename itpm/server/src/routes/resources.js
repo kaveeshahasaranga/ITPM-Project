@@ -16,17 +16,6 @@ const createSchema = z.object({
   active: z.boolean().optional()
 });
 
-router.post("/", requireAuth, requireRole("admin"), async (req, res) => {
-  const parse = createSchema.safeParse(req.body);
-  if (!parse.success) {
-    return res.status(400).json({ message: "Invalid input" });
-  }
-  const resource = await Resource.create({
-    name: parse.data.name,
-    active: parse.data.active ?? true
-  });
-  res.status(201).json(resource);
-});
 
 const updateSchema = z.object({
   active: z.boolean()
