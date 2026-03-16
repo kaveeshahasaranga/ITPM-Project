@@ -42,7 +42,25 @@ const parseQuantityWithUnit = (input, stockUnit) => {
   // Convert to stock's unit system
   let finalValue = rawValue;
   
- 
+  if (baseUnit === "kg" || baseUnit === "kilogram") {
+    if (unitConversions[rawUnit] !== undefined) {
+      finalValue = rawValue * unitConversions[rawUnit];
+    } else {
+      return { value: null, error: `Unit '${rawUnit}' not recognized. Use: g, kg, ml, l, pcs` };
+    }
+  } else if (baseUnit === "liters" || baseUnit === "liter" || baseUnit === "litres" || baseUnit === "litre" || baseUnit === "l") {
+    if (unitConversions[rawUnit] !== undefined) {
+      finalValue = rawValue * unitConversions[rawUnit];
+    } else {
+      return { value: null, error: `Unit '${rawUnit}' not recognized. Use: ml, l` };
+    }
+  } else if (baseUnit === "pcs" || baseUnit === "pieces" || baseUnit === "pc" || baseUnit === "piece") {
+    if (unitConversions[rawUnit] !== undefined || rawUnit === baseUnit) {
+      finalValue = rawValue;
+    } else {
+      return { value: null, error: `Use pieces (pcs) format for ${stockUnit}` };
+    }
+  } else {
     // Assume direct numeric input
     finalValue = rawValue;
   }
