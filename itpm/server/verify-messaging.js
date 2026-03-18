@@ -46,7 +46,28 @@ async function verify() {
             role: "admin",
             createdBy: student._id
         });
-        
+        console.log("Notification created:", notif1._id);
+
+        // 4. Verify admin can see it (query logic)
+        const adminMessages = await Message.find({ isStudentToAdmin: true });
+        const found = adminMessages.find(m => m._id.equals(msg1._id));
+        if (found) console.log("✅ Admin query works: Admin can see the message");
+        else console.log("❌ Admin query failed");
+
+        // 5. Admin replies
+        const msg2 = await Message.create({
+            sender: admin._id,
+            recipient: student._id,
+            content: "Hello Student, received.",
+            type: "reply",
+            isStudentToAdmin: false
+        });
+        console.log("Reply created:", msg2._id);
+
+        // 6. Verify student can see it (query logic)
+        const studentMessages = await Message.find({
+            $or: [{ sender: student._id }, { recipient: student._id }]
+        });
         const foundReply = studentMessages.find(m => m._id.equals(msg2._id));
         if (foundReply) console.log("✅ Student query works: Student can see the reply");
         else console.log("❌ Student query failed");
