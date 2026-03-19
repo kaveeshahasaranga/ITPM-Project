@@ -56,7 +56,58 @@ export default function Dashboard() {
     }
   };
 
- 
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  useEffect(() => {
+    if (!prevRole) return;
+    // Check for role changes every 5 seconds
+    const interval = setInterval(loadDashboard, 5000);
+    return () => clearInterval(interval);
+  }, [prevRole]);
+
+  const resetPassword = async (userId, email) => {
+    setResettingPassword(prev => ({ ...prev, [userId]: true }));
+    try {
+      const result = await apiFetch("/auth/admin/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ userId })
+      });
+      const tempNotice = result?.tempPassword ? ` Temporary password: ${result.tempPassword}` : "";
+      const emailNotice = result?.emailStatus && result.emailStatus !== "sent"
+        ? ` (email ${result.emailStatus})`
+        : "";
+      setSuccess(`✅ ${result.message}${emailNotice}.${tempNotice}`);
+      setTimeout(() => setSuccess(""), 6000);
+      await loadDashboard();
+    } catch (err) {
+      setError("❌ " + (err.message || "Failed to reset password"));
+      setTimeout(() => setError(""), 4000);
+    } finally {
+      setResettingPassword(prev => ({ ...prev, [userId]: false }));
+    }
+  };
+
+  const deleteRecovery = async (notificationId) => {
+    try {
+      await apiFetch(`/notifications/${notificationId}`, { method: "DELETE" });
+      await loadDashboard();
+    } catch (err) {
+      setError("❌ " + (err.message || "Failed to delete request"));
+      setTimeout(() => setError(""), 4000);
+    }
+  };
+
+  const deleteAlert = async (notificationId) => {
+    try {
+      await apiFetch(`/notifications/${notificationId}`, { method: "DELETE" });
+      await loadDashboard();
+    } catch (err) {
+      setError("❌ " + (err.message || "Failed to delete alert"));
+      setTimeout(() => setError(""), 4000);
+    }
+  };
 
   const markNoticeRead = async (id) => {
     setReadingIds(prev => new Set(prev).add(id));
