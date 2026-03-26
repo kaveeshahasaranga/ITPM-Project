@@ -63,33 +63,7 @@ export default function VisitorsPage() {
     }
   };
 
-  const approvePass = async (id) => {
-    try {
-      await apiFetch(`/visitors/${id}/approve`, { method: "PATCH" });
-      await loadData();
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const markNotificationRead = async (id) => {
-    setReadingIds(prev => new Set(prev).add(id));
-    try {
-      await apiFetch(`/notifications/${id}/read`, { method: "PATCH" });
-      setNotifications(prev => prev.filter(n => n._id !== id));
-      setSuccess("Notification marked as read");
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setError(err.message);
-      setTimeout(() => setError(""), 3000);
-    } finally {
-      setReadingIds(prev => {
-        const updated = new Set(prev);
-        updated.delete(id);
-        return updated;
-      });
-    }
-  };
+  
 
   const markAllRead = async () => {
     const allIds = notifications.map(n => n._id);
