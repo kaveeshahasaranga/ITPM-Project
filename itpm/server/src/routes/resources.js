@@ -16,6 +16,25 @@ const createSchema = z.object({
   active: z.boolean().optional()
 });
 
+router.post("/", requireAuth, requireRole("admin"), async (req, res) => {
+  const parse = createSchema.safeParse(req.body);
+  if (!parse.success) {
+    return res.status(400).json({ message: "Invalid input" });
+  }
+  
+  const existing = await Resource.findOne({ name: parse.data.name });
+  if (existing) {
+    return res.status(409).json({ message: "Resource already exists" });
+  }
+
+  const resource = await Resource.create({
+    name: parse.data.name,
+    active: parse.data.active ?? true
+  });
+  
+  res.status(201).json(resource);
+});
+
 
 const updateSchema = z.object({
   active: z.boolean()

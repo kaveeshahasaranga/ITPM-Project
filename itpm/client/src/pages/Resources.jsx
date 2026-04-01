@@ -1,6 +1,22 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api.js";
 import Section from "../components/Section.jsx";
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { format, parse, startOfWeek, getDay } from 'date-fns';
+import { enUS } from 'date-fns/locale';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+const locales = {
+  'en-US': enUS,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
 
 const defaultResources = [
   "Laundry Machine",
@@ -228,8 +244,35 @@ export default function ResourcesPage() {
 
   // Admin view
   if (user && user.role === "admin") {
+    const calendarEvents = bookings.map(b => ({
+      title: `${b.resourceName} (${b.studentId?.name || "Student"})`,
+      start: new Date(b.start),
+      end: new Date(b.end),
+      resourceName: b.resourceName,
+    }));
+
     return (
       <div className="page">
+        <Section title="Resource Booking Calendar">
+          <div style={{ height: "600px", background: "white", padding: "1rem", borderRadius: "10px", boxShadow: "0 4px 6px rgba(0,0,0,0.1)", marginBottom: "2rem" }}>
+            <Calendar
+              localizer={localizer}
+              events={calendarEvents}
+              startAccessor="start"
+              endAccessor="end"
+              style={{ height: "100%", width: "100%" }}
+              eventPropGetter={(event) => ({
+                style: { 
+                  backgroundColor: resourceColor[event.resourceName] || "#3b82f6",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px"
+                }
+              })}
+            />
+          </div>
+        </Section>
+
         <Section title="Create Resource">
           {error && <div className="alert alert-error">{error}</div>}
           <form className="form-grid" onSubmit={createResource}>

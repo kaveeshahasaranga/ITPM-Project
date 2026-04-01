@@ -42,7 +42,7 @@ export default function Login({ onLoginSuccess }) {
     try {
       const data = await apiFetch("/auth/login", {
         method: "POST",
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email: email.trim(), password: password.trim() })
       });
       setToken(data.token);
       onLoginSuccess?.(data.user || { email });
