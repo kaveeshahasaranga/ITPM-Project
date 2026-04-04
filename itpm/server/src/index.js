@@ -116,3 +116,5 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (err) => {
   console.error('[CRITICAL] Unhandled rejection:', err);
 });
+
+// trigger restart
