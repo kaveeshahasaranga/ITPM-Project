@@ -35,6 +35,7 @@ export default function Register() {
         return "";
       case "email":
         if (!value.trim()) return "Email is required";
+        if (/[A-Z]/.test(value)) return "Email cannot contain uppercase letters";
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Invalid email format";
         if (value.length > 100) return "Email must not exceed 100 characters";
         return "";
@@ -103,8 +104,8 @@ export default function Register() {
         method: "POST",
         body: JSON.stringify(payload)
       });
-      setMessage("✓ Registration successful! Awaiting admin approval...");
-      setTimeout(() => navigate("/"), 2000);
+      setMessage("✓ Registration successful! You can now log in.");
+      setTimeout(() => navigate("/login"), 1500);
     } catch (err) {
       setError(err.message || "Registration failed");
     } finally {
@@ -157,7 +158,11 @@ export default function Register() {
               <label htmlFor="email">Email Address *</label>
               <input
                 id="email"
-                type="email"
+                type="text"
+                inputMode="email"
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
                 placeholder="john@example.com"
                 value={form.email}
                 onChange={(e) => update("email", e.target.value)}

@@ -17,6 +17,17 @@ const paymentCardSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const roomRequestSchema = new mongoose.Schema(
+  {
+    requested: { type: Boolean, default: false },
+    preferredRoomNumber: { type: String },
+    preferredBedNumber: { type: Number, min: 1, max: 10 },
+    notes: { type: String },
+    requestedAt: { type: Date }
+  },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
@@ -25,10 +36,12 @@ const userSchema = new mongoose.Schema(
     resetToken: { type: String, select: false },
     resetTokenExpiry: { type: Date, select: false },
     role: { type: String, enum: ["student", "admin"], default: "student", index: true },
-    status: { type: String, enum: ["pending", "approved"], default: "pending", index: true },
+    status: { type: String, enum: ["pending", "approved"], default: "approved", index: true },
     phone: { type: String },
+    profilePicture: { type: String },
     emergencyContact: emergencyContactSchema,
     paymentCard: paymentCardSchema,
+    roomRequest: roomRequestSchema,
     walletBalance: { type: Number, default: 0, min: 0 },
     monthlySalary: { type: Number, default: 0 },
     roomId: { type: mongoose.Schema.Types.ObjectId, ref: "Room", index: true },

@@ -14,7 +14,7 @@ const router = Router();
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name too long").regex(/^[a-zA-Z\s]+$/, "Name must contain only letters and spaces"),
-  email: z.string().email("Invalid email format").max(100, "Email too long"),
+  email: z.string().email("Invalid email format").max(100, "Email too long").refine((value) => value === value.toLowerCase(), "Email cannot contain uppercase letters"),
   password: z.string().min(6, "Password must be at least 6 characters").max(50, "Password too long").regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain uppercase, lowercase, and digits"),
   phone: z.string().length(10, "Phone must be exactly 10 digits").regex(/^[0-9]+$/, "Phone must contain only numbers"),
   emergencyContact: z.object({
@@ -43,9 +43,9 @@ router.post("/register", async (req, res, next) => {
       phone,
       emergencyContact: { name: emergencyContact.name, phone: emergencyContact.phone },
       role: "student",
-      status: "pending"
+      status: "approved"
     });
-    return res.status(201).json({ id: user._id, message: "Registration successful. Awaiting admin approval." });
+    return res.status(201).json({ id: user._id, message: "Registration successful. You can now log in." });
   } catch (error) {
     next(error);
   }
@@ -64,7 +64,8 @@ router.post("/login", authLimiter, async (req, res, next) => {
       return res.status(400).json({ message: errors });
     }
     const { email, password } = parse.data;
-    const user = await User.findOne({ email }).select("+passwordHash");
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail }).select("+passwordHash");
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -73,7 +74,8 @@ router.post("/login", authLimiter, async (req, res, next) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
     if (user.role === "student" && user.status !== "approved") {
-      return res.status(403).json({ message: "Account awaiting approval" });
+      user.status = "approved";
+      await user.save();
     }
     const token = jwt.sign(
       { id: user._id, role: user.role }, 
@@ -109,7 +111,8 @@ router.post("/recover", authLimiter, async (req, res, next) => {
     }
 
     const { email, newPassword } = parse.data;
-    const user = await User.findOne({ email });
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       return res.status(404).json({ message: "No account found with this email. Please check and try again." });
@@ -130,7 +133,7 @@ router.post("/recover", authLimiter, async (req, res, next) => {
     // Notify admin
     await Notification.create({
       title: "Password reset",
-      message: `${user.name} (${email}) reset their password.`,
+      message: `${user.name} (${normalizedEmail}) reset their password.`,
       type: "password-recovery",
       role: "admin",
       createdBy: user._id

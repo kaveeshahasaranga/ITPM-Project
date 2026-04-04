@@ -42,7 +42,7 @@ export default function Login({ onLoginSuccess }) {
     try {
       const data = await apiFetch("/auth/login", {
         method: "POST",
-        body: JSON.stringify({ email: email.trim(), password: password.trim() })
+        body: JSON.stringify({ email, password })
       });
       setToken(data.token);
       onLoginSuccess?.(data.user || { email });
@@ -106,12 +106,6 @@ export default function Login({ onLoginSuccess }) {
         <p className="auth-footer">
           New student? <a href="/register">Register here</a>
         </p>
-        
-        <div className="demo-info">
-          <p><strong>Demo Admin:</strong></p>
-          <p>📧 admin@hostelmate.local</p>
-          <p>🔑 Admin@123</p>
-        </div>
       </div>
     </div>
   );

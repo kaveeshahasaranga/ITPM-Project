@@ -17,7 +17,6 @@ import Announcements from "./pages/Announcements.jsx";
 import Resources from "./pages/Resources.jsx";
 import Visitors from "./pages/Visitors.jsx";
 import ScanQR from "./pages/ScanQR.jsx";
-import AdminMessages from "./pages/AdminMessages.jsx";
 import Navbar from "./components/Navbar.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import { getToken, clearToken, apiFetch } from "./api.js";
@@ -148,8 +147,6 @@ export default function App() {
       <Route path="/resources" element={<ProtectedRoute user={user} onLogout={handleLogout}><Resources /></ProtectedRoute>} />
       <Route path="/visitors" element={<ProtectedRoute user={user} onLogout={handleLogout}><Visitors /></ProtectedRoute>} />
       <Route path="/scan-qr" element={<ProtectedRoute user={user} onLogout={handleLogout}><ScanQR /></ProtectedRoute>} />
-      <Route path="/messages" element={<ProtectedRoute user={user} onLogout={handleLogout}><AdminMessages /></ProtectedRoute>} />
-
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );

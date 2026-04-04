@@ -21,8 +21,6 @@ export async function requireAuth(req, res, next) {
 }
 
 export function requireApproved(req, res, next) {
-  if (req.user.role === "student" && req.user.status !== "approved") {
-    return res.status(403).json({ message: "Account awaiting approval" });
-  }
+  // Approval checks are disabled: students can access features immediately after registration.
   next();
 }

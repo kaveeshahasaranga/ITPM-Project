@@ -29,8 +29,8 @@ const adminLinks = [
     ]
   },
   {
-    section: "Approvals", items: [
-      { path: "/approvals", label: "Student Approvals", icon: "✔️" }
+    section: "Room Management", items: [
+      { path: "/approvals", label: "Room Requests", icon: "🛏️" }
     ]
   },
   {
@@ -44,8 +44,7 @@ const adminLinks = [
   {
     section: "Communications", items: [
       { path: "/announcements", label: "Announcements", icon: "📢" },
-      { path: "/scan-qr", label: "Scan Pass", icon: "📱" },
-      { path: "/messages", label: "Messages", icon: "💬" }
+      { path: "/scan-qr", label: "Scan Pass", icon: "📱" }
     ]
   }
 ];

@@ -9,7 +9,7 @@ const router = Router();
 
 router.get("/students", requireAuth, requireRole("admin"), async (_req, res) => {
   const students = await User.find({ role: "student" })
-    .select("name email status roomId bedNumber faculty year visitorNumber")
+    .select("name email status roomId bedNumber faculty year visitorNumber roomRequest")
     .populate("roomId", "roomNumber");
   res.json(students);
 });
@@ -55,6 +55,13 @@ router.patch("/students/:id/assign-room", requireAuth, requireRole("admin"), asy
 
   student.roomId = room._id;
   student.bedNumber = bedNumber;
+  student.roomRequest = {
+    requested: false,
+    preferredRoomNumber: undefined,
+    preferredBedNumber: undefined,
+    notes: undefined,
+    requestedAt: undefined
+  };
   await student.save();
   res.json(student);
 });

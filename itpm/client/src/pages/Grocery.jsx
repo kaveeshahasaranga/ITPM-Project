@@ -111,15 +111,30 @@ export default function GroceryPage() {
 
   const submitGrocery = async (e) => {
     e.preventDefault();
-    const form = new FormData(e.target);
-    const quantity = Number(form.get("quantity"));
+    console.log("[Grocery] Submit form clicked");
+    setError("");
     
-    if (quantity <= 0) {
-      setError("Quantity must be greater than 0");
-      return;
-    }
-
     try {
+      const form = new FormData(e.target);
+      const item = form.get("item");
+      const quantity = Number(form.get("quantity"));
+      
+      console.log("[Grocery] Form data:", { item, quantity });
+      
+      if (!item || item.trim() === "") {
+        const err = "Item name is required";
+        console.log("[Grocery] Validation error:", err);
+        setError(err);
+        return;
+      }
+      
+      if (quantity <= 0) {
+        const err = "Quantity must be greater than 0";
+        console.log("[Grocery] Validation error:", err);
+        setError(err);
+        return;
+      }
+
       const photos = [
         form.get("photo1"),
         form.get("photo2"),
@@ -127,19 +142,86 @@ export default function GroceryPage() {
         form.get("photo4")
       ].filter((v) => v && v.trim().length > 0);
 
-      await apiFetch("/grocery", {
+      const payload = {
+        item,
+        quantity,
+        notes: form.get("notes"),
+        photos
+      };
+      
+      console.log("[Grocery] Sending API request:", payload);
+      
+      const result = await apiFetch("/grocery", {
         method: "POST",
-        body: JSON.stringify({
-          item: form.get("item"),
-          quantity,
-          notes: form.get("notes"),
-          photos
-        })
+        body: JSON.stringify(payload)
       });
+      
+      console.log("[Grocery] API response:", result);
       e.target.reset();
+      setError("");
+      alert("✅ Request submitted successfully!");
       await loadGrocery();
     } catch (err) {
-      setError(err.message);
+      console.error("[Grocery] Error:", err);
+      setError(err.message || "Failed to submit request. Please try again.");
+    }
+  };
+
+  const submitGroceryDirect = async () => {
+    console.log("[Grocery-Direct] Submit clicked");
+    setError("");
+    
+    try {
+      const itemField = document.getElementById("groceryItemField");
+      const qtyField = document.getElementById("groceryQtyField");
+      const notesField = document.getElementById("groceryNotesField");
+      
+      const item = itemField?.value?.trim() || "";
+      const quantity = Number(qtyField?.value || 0);
+      const notes = notesField?.value || "";
+      
+      console.log("[Grocery-Direct] Form data:", { item, quantity });
+      
+      if (!item) {
+        const err = "Item name is required";
+        console.log("[Grocery-Direct] Validation error:", err);
+        setError(err);
+        return;
+      }
+      
+      if (quantity <= 0) {
+        const err = "Quantity must be greater than 0";
+        console.log("[Grocery-Direct] Validation error:", err);
+        setError(err);
+        return;
+      }
+
+      const payload = {
+        item,
+        quantity,
+        notes: notes || undefined
+      };
+      
+      console.log("[Grocery-Direct] Sending API request:", payload);
+      
+      const result = await apiFetch("/grocery", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      
+      console.log("[Grocery-Direct] API response:", result);
+      
+      // Clear fields
+      if (itemField) itemField.value = "";
+      if (qtyField) qtyField.value = "";
+      if (notesField) notesField.value = "";
+      
+      setError("");
+      alert("✅ Request submitted successfully!");
+      await loadGrocery();
+    } catch (err) {
+      console.error("[Grocery-Direct] Error:", err);
+      setError(err.message || "Failed to submit request. Please try again.");
     }
   };
 
@@ -148,51 +230,164 @@ export default function GroceryPage() {
     setShowStockRequest(true);
     setStockRequestQty("");
     setStockRequestQtyError("");
+    setError("");
   };
 
   const submitStockRequest = async (e) => {
     e.preventDefault();
-    const form = new FormData(e.target);
-    const rawQuantity = form.get("quantity");
-    const payNow = form.get("payNow") === "on";
+    console.log("[StockRequest] Submit form clicked");
     
-    // Parse quantity with unit
-    const parsed = parseQuantityWithUnit(rawQuantity, selectedStock.unit);
+    // Clear previous errors
+    setError("");
+    setStockRequestQtyError("");
     
-    if (parsed.error) {
-      setError(parsed.error);
-      setStockRequestQtyError(parsed.error);
-      return;
-    }
-    
-    const quantity = parsed.value;
-
-    if (quantity > selectedStock.quantity) {
-      setError(`Only ${selectedStock.quantity} ${selectedStock.unit} available`);
-      return;
-    }
-
-    if (!payNow) {
-      setError("Payment is required to submit this stock request");
-      return;
-    }
-
     try {
-      await apiFetch("/grocery", {
+      const form = new FormData(e.target);
+      const rawQuantity = form.get("quantity");
+      const payNow = form.get("payNow") === "on";
+      
+      console.log("[StockRequest] Form data:", { rawQuantity, payNow, stock: selectedStock?.name });
+      
+      // Validate quantity is filled
+      if (!rawQuantity || rawQuantity.trim() === "") {
+        const err = "Please enter a quantity";
+        console.log("[StockRequest] Validation error:", err);
+        setError(err);
+        setStockRequestQtyError(err);
+        return;
+      }
+      
+      // Parse quantity with unit
+      const parsed = parseQuantityWithUnit(rawQuantity, selectedStock.unit);
+      console.log("[StockRequest] Parsed quantity:", parsed);
+      
+      if (parsed.error) {
+        console.log("[StockRequest] Parsing error:", parsed.error);
+        setError(parsed.error);
+        setStockRequestQtyError(parsed.error);
+        return;
+      }
+      
+      const quantity = parsed.value;
+
+      if (quantity > selectedStock.quantity) {
+        const err = `Only ${selectedStock.quantity} ${selectedStock.unit} available`;
+        console.log("[StockRequest] Quantity validation error:", err);
+        setError(err);
+        return;
+      }
+
+      if (!payNow) {
+        const err = "⚠️ You must confirm payment to submit this request";
+        console.log("[StockRequest] Payment validation error:", err);
+        setError(err);
+        return;
+      }
+
+      const payload = {
+        item: selectedStock.name,
+        quantity,
+        notes: form.get("notes") || `Request from available stock`,
+        stockId: selectedStock._id,
+        payNow: true
+      };
+      
+      console.log("[StockRequest] Sending API request:", payload);
+
+      const result = await apiFetch("/grocery", {
         method: "POST",
-        body: JSON.stringify({
-          item: selectedStock.name,
-          quantity,
-          notes: form.get("notes") || `Request from available stock`,
-          stockId: selectedStock._id,
-          payNow: true
-        })
+        body: JSON.stringify(payload)
       });
+      
+      console.log("[StockRequest] API response:", result);
       setShowStockRequest(false);
       setSelectedStock(null);
+      setError("");
+      setStockRequestQty("");
+      alert("✅ Stock request submitted successfully! Payment received.");
       await loadGrocery();
     } catch (err) {
-      setError(err.message);
+      console.error("[StockRequest] Error:", err);
+      setError(err.message || "Failed to submit stock request. Please try again.");
+    }
+  };
+
+  const submitStockRequestDirect = async () => {
+    console.log("[StockRequest-Direct] Submit clicked");
+    
+    setError("");
+    setStockRequestQtyError("");
+    
+    try {
+      const rawQuantity = stockRequestQty;
+      const payNowCheckbox = document.getElementById("payNowCheckbox");
+      const payNow = payNowCheckbox?.checked || false;
+      const notesField = document.getElementById("stockNotesField");
+      const notes = notesField?.value || "";
+      
+      console.log("[StockRequest-Direct] Form data:", { rawQuantity, payNow, stock: selectedStock?.name });
+      
+      // Validate quantity is filled
+      if (!rawQuantity || rawQuantity.trim() === "") {
+        const err = "Please enter a quantity";
+        console.log("[StockRequest-Direct] Validation error:", err);
+        setError(err);
+        setStockRequestQtyError(err);
+        return;
+      }
+      
+      // Parse quantity with unit
+      const parsed = parseQuantityWithUnit(rawQuantity, selectedStock.unit);
+      console.log("[StockRequest-Direct] Parsed quantity:", parsed);
+      
+      if (parsed.error) {
+        console.log("[StockRequest-Direct] Parsing error:", parsed.error);
+        setError(parsed.error);
+        setStockRequestQtyError(parsed.error);
+        return;
+      }
+      
+      const quantity = parsed.value;
+
+      if (quantity > selectedStock.quantity) {
+        const err = `Only ${selectedStock.quantity} ${selectedStock.unit} available`;
+        console.log("[StockRequest-Direct] Quantity validation error:", err);
+        setError(err);
+        return;
+      }
+
+      if (!payNow) {
+        const err = "⚠️ You must confirm payment to submit this request";
+        console.log("[StockRequest-Direct] Payment validation error:", err);
+        setError(err);
+        return;
+      }
+
+      const payload = {
+        item: selectedStock.name,
+        quantity,
+        notes: notes || `Request from available stock`,
+        stockId: selectedStock._id,
+        payNow: true
+      };
+      
+      console.log("[StockRequest-Direct] Sending API request:", payload);
+
+      const result = await apiFetch("/grocery", {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      
+      console.log("[StockRequest-Direct] API response:", result);
+      setShowStockRequest(false);
+      setSelectedStock(null);
+      setError("");
+      setStockRequestQty("");
+      alert("✅ Stock request submitted successfully! Payment received.");
+      await loadGrocery();
+    } catch (err) {
+      console.error("[StockRequest-Direct] Error:", err);
+      setError(err.message || "Failed to submit stock request. Please try again.");
     }
   };
 
@@ -260,7 +455,7 @@ export default function GroceryPage() {
 
   return (
     <div className="page">
-      <Section title="� How to Request from Available Stocks">
+      <Section title="  How to Request from Available Stocks">
         <div style={{ backgroundColor: "#f3f4f6", padding: "1rem", borderRadius: "0.5rem", fontSize: "0.95rem" }}>
           <p><strong>✅ You can request ANY quantity you need!</strong></p>
           <p style={{ marginTop: "0.5rem" }}>Examples:</p>
@@ -274,7 +469,7 @@ export default function GroceryPage() {
         </div>
       </Section>
 
-      <Section title="�🛒 Available Stocks">
+      <Section title=" 🛒 Available Stocks">
         {stocks.length === 0 ? (
           <p className="empty">No items in stock right now</p>
         ) : (
@@ -307,7 +502,8 @@ export default function GroceryPage() {
 
       {showStockRequest && selectedStock && (
         <Section title={`Request ${selectedStock.name}`}>
-          <form className="form-grid" onSubmit={submitStockRequest}>
+          {error && <p className="error">{error}</p>}
+          <div className="form-grid">
             <div className="form-group">
               <label>Item</label>
               <input type="text" value={selectedStock.name} disabled />
@@ -324,7 +520,6 @@ export default function GroceryPage() {
               <label>Request Quantity * (with {selectedStock.unit})</label>
               <input 
                 type="text" 
-                name="quantity" 
                 placeholder={
                   selectedStock.unit === "kg" ? "e.g., 500g, 0.5kg, 1, 250" :
                   selectedStock.unit === "g" ? "e.g., 500, 0.5kg" :
@@ -339,7 +534,6 @@ export default function GroceryPage() {
                   selectedStock.unit === "pcs" ? "Enter quantity: 2, 5, 10, etc." :
                   `Enter quantity in ${selectedStock.unit}`
                 }
-                required
                 value={stockRequestQty}
                 onChange={(e) => {
                   setStockRequestQty(e.target.value);
@@ -375,15 +569,21 @@ export default function GroceryPage() {
             </div>
             <div className="form-group full-width">
               <label>Notes (Optional)</label>
-              <textarea name="notes" placeholder="Any special requirements..."></textarea>
+              <textarea placeholder="Any special requirements..." id="stockNotesField"></textarea>
             </div>
             <div className="form-group full-width">
               <label className="payment-confirm">
-                <input type="checkbox" name="payNow" required /> I confirm payment
+                <input type="checkbox" id="payNowCheckbox" /> I confirm payment
               </label>
             </div>
             <div className="button-group">
-              <button type="submit" className="btn-primary">✅ Submit Request</button>
+              <button 
+                type="button"
+                className="btn-primary"
+                onClick={() => submitStockRequestDirect()}
+              >
+                ✅ Submit Request
+              </button>
               <button 
                 type="button" 
                 className="btn-secondary" 
@@ -398,27 +598,27 @@ export default function GroceryPage() {
                 ✖️ Cancel
               </button>
             </div>
-          </form>
+          </div>
         </Section>
       )}
 
       <Section title="Request Items (If not in stock)">
         {error && <p className="error">{error}</p>}
-        <form className="form-grid" onSubmit={submitGrocery}>
+        <div className="form-grid">
           <div className="form-group">
             <label>Item Name *</label>
-            <input type="text" name="item" placeholder="e.g., Rice, Water, Bulb" required />
+            <input type="text" id="groceryItemField" placeholder="e.g., Rice, Water, Bulb" />
           </div>
           <div className="form-group">
             <label>Quantity * (with unit)</label>
-            <input type="number" name="quantity" min="0.01" step="0.01" placeholder="e.g., 0.5, 1, 10" required />
+            <input type="number" id="groceryQtyField" min="0.01" step="0.01" placeholder="e.g., 0.5, 1, 10" />
           </div>
           <div className="form-group full-width">
             <label>Notes (include unit: kg, pcs, liters, ml, etc.)</label>
-            <textarea name="notes" placeholder="e.g., 500g rice, 2 liters milk, 10 pcs eggs"></textarea>
+            <textarea id="groceryNotesField" placeholder="e.g., 500g rice, 2 liters milk, 10 pcs eggs"></textarea>
           </div>
-          <button type="submit" className="btn-primary">Request Item</button>
-        </form>
+          <button type="button" className="btn-primary" onClick={submitGroceryDirect}>Request Item</button>
+        </div>
       </Section>
 
       <Section title="Your Requests">

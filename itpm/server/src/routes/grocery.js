@@ -84,12 +84,17 @@ const updateSchema = z.object({
 });
 
 router.post("/", requireAuth, requireApproved, async (req, res) => {
+  console.log("[Grocery] POST request received from user:", req.user._id);
+  console.log("[Grocery] Request body:", req.body);
+  
   const parse = createSchema.safeParse(req.body);
   if (!parse.success) {
+    console.log("[Grocery] Validation failed:", parse.error);
     return res.status(400).json({ message: "Invalid input" });
   }
   const data = parse.data;
   const requestType = data.stockId ? "stock" : "new";
+  console.log("[Grocery] Request type:", requestType);
 
   if (requestType === "new") {
     const existing = await GroceryRequest.findOne({
@@ -125,8 +130,10 @@ router.post("/", requireAuth, requireApproved, async (req, res) => {
   };
 
   if (requestType === "stock") {
+    console.log("[Grocery] Processing stock request for stock:", data.stockId);
     const stock = await GroceryStock.findById(data.stockId);
     if (!stock || !stock.active) {
+      console.log("[Grocery] Stock not found or inactive:", data.stockId);
       return res.status(404).json({ message: "Stock item not found" });
     }
     
@@ -135,10 +142,13 @@ router.post("/", requireAuth, requireApproved, async (req, res) => {
     if (typeof data.quantity === 'string') {
       const parsed = parseQuantityWithUnit(data.quantity, stock.unit);
       if (parsed.error) {
+        console.log("[Grocery] Quantity parsing error:", parsed.error);
         return res.status(400).json({ message: parsed.error });
       }
       parsedQuantity = parsed.value;
     }
+    
+    console.log("[Grocery] Stock validation:", { parsedQuantity, available: stock.quantity, price: stock.price });
     
     if (parsedQuantity > stock.quantity) {
       return res.status(400).json({ message: `Only ${stock.quantity} ${stock.unit} available` });
@@ -150,11 +160,14 @@ router.post("/", requireAuth, requireApproved, async (req, res) => {
       return res.status(400).json({ message: "Stock item price is not set" });
     }
     if (!req.user.paymentCard?.last4) {
-      return res.status(400).json({ message: "Add a payment card in your profile" });
+      console.log("[Grocery] No payment card on file");
+      return res.status(400).json({ message: "Add a payment card in your profile before requesting stock" });
     }
     // Calculate price per unit based on total price / total quantity
     const pricePerUnit = Number((stock.price / stock.quantity).toFixed(2));
     const totalAmount = Number((pricePerUnit * parsedQuantity).toFixed(2));
+    
+    console.log("[Grocery] Payment calculation:", { pricePerUnit, totalAmount, userBalance: req.user.walletBalance });
     
     requestPayload = {
       ...requestPayload,
@@ -168,13 +181,16 @@ router.post("/", requireAuth, requireApproved, async (req, res) => {
       status: "Waiting for Delivery"
     };
     if (req.user.walletBalance < requestPayload.totalAmount) {
-      return res.status(400).json({ message: "Insufficient account balance" });
+      console.log("[Grocery] Insufficient balance:", { required: totalAmount, available: req.user.walletBalance });
+      return res.status(400).json({ message: `Insufficient account balance. Need LKR ${totalAmount}, you have LKR ${req.user.walletBalance}` });
     }
     req.user.walletBalance = Number((req.user.walletBalance - requestPayload.totalAmount).toFixed(2));
     await req.user.save();
+    console.log("[Grocery] Payment deducted, new balance:", req.user.walletBalance);
   }
 
   const request = await GroceryRequest.create(requestPayload);
+  console.log("[Grocery] Request created successfully:", { id: request._id, type: requestType, item: request.item, qty: request.quantity });
 
   if (request.requestType === "stock") {
     await Notification.create({
@@ -194,6 +210,7 @@ router.post("/", requireAuth, requireApproved, async (req, res) => {
     createdBy: req.user._id
   });
 
+  console.log("[Grocery] Notifications created, sending response");
   res.status(201).json(request);
 });
 
@@ -260,11 +277,18 @@ const pricingSchema = z.object({
 
 // Grocery stocks
 router.get("/stocks", requireAuth, requireApproved, async (req, res) => {
-  const query = req.user.role === "admin"
-    ? {}
-    : { active: true, quantity: { $gt: 0 }, price: { $gt: 0 } };
-  const stocks = await GroceryStock.find(query).sort({ name: 1 });
-  res.json(stocks);
+  try {
+    console.log("[Grocery] GET /stocks request from user:", req.user._id);
+    const query = req.user.role === "admin"
+      ? {}
+      : { active: true, quantity: { $gt: 0 }, price: { $gt: 0 } };
+    const stocks = await GroceryStock.find(query).sort({ name: 1 });
+    console.log("[Grocery] Returning stocks:", stocks.length, "items");
+    res.json(stocks);
+  } catch (err) {
+    console.error("[Grocery] Error loading stocks:", err);
+    res.status(500).json({ message: "Failed to load stocks" });
+  }
 });
 
 router.post("/stocks", requireAuth, requireRole("admin"), async (req, res) => {

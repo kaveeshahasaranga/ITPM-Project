@@ -250,7 +250,13 @@ export default function Dashboard() {
       <Section title="Welcome">
         <div className="dashboard-welcome-card">
           <div className="welcome-header">
-            <div className="welcome-avatar">{user.name.charAt(0).toUpperCase()}</div>
+            <div className="welcome-avatar">
+              {user.profilePicture ? (
+                <img src={user.profilePicture} alt={user.name} style={{ width: "100%", height: "100%", borderRadius: "10px", objectFit: "contain", backgroundColor: "#fff", padding: "2px" }} />
+              ) : (
+                user.name.charAt(0).toUpperCase()
+              )}
+            </div>
             <div className="welcome-info">
               <h2>Welcome, {user.name}! 👋</h2>
               <p className="welcome-email">{user.email}</p>
@@ -370,9 +376,9 @@ export default function Dashboard() {
             <div className="stat-card stat-card-warning">
               <div className="stat-icon">⏳</div>
               <div className="stat-content">
-                <h3>Pending Approvals</h3>
+                <h3>Auto-Approved</h3>
                 <p className="stat-number">{adminStats?.students.pending || 0}</p>
-                <p className="stat-detail">Students awaiting approval</p>
+                <p className="stat-detail">Registrations no longer need admin approval</p>
               </div>
               <button className="stat-action" onClick={() => navigate('/approvals')}>Review →</button>
             </div>

@@ -14,7 +14,7 @@ const adminCreateSchema = z.object({
   visitorName: z.string().min(2).max(100).regex(/^[a-zA-Z\s]+$/, "Name must contain only letters and spaces"),
   purpose: z.string().min(2).max(200).optional(),
   visitDate: z.string().datetime("Invalid visit date format"),
-  idType: z.enum(["Aadhar", "PAN", "License", "Passport", "Other"]).optional(),
+  idType: z.enum(["License", "Passport", "NIC"]).optional(),
   idNumber: z.string().min(2).max(20).optional(),
   contact: z.string().length(10).regex(/^[0-9]+$/, "Contact must be 10 digits").optional(),
   notes: z.string().max(500).optional(),
@@ -30,7 +30,7 @@ const studentRequestSchema = z.object({
     const now = new Date();
     return visitDate > now;
   }, { message: "Visit date must be in the future, not in the past" }),
-  idType: z.enum(["Aadhar", "PAN", "License", "Passport", "Other"]).optional(),
+  idType: z.enum(["License", "Passport", "NIC"]).optional(),
   idNumber: z.string().min(2).max(20).optional(),
   contact: z.string().length(10, "Contact must be exactly 10 digits").regex(/^[0-9]+$/, "Contact must contain only digits"),
   notes: z.string().max(500).optional(),

@@ -23,6 +23,8 @@ export async function apiFetch(path, options = {}) {
   }
 
   try {
+    console.log("[API] Request:", { path, method: options.method || "GET" });
+    
     const res = await fetch(`${API_URL}${path}`, {
       ...options,
       headers
@@ -30,11 +32,15 @@ export async function apiFetch(path, options = {}) {
 
     const data = await res.json().catch(() => ({}));
     
+    console.log("[API] Response:", { path, status: res.status, data });
+    
     if (!res.ok) {
       const message = data?.message || `Request failed with status ${res.status}`;
       const error = new Error(message);
       error.status = res.status;
       error.data = data;
+      
+      console.error("[API] Error:", { path, status: res.status, message });
       
       // Auto-logout on 401
       if (res.status === 401 && path !== '/auth/login') {
@@ -47,6 +53,7 @@ export async function apiFetch(path, options = {}) {
     
     return data;
   } catch (error) {
+    console.error("[API] Fetch error:", error);
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
       throw new Error('Network error. Please check your connection.');
     }
