@@ -114,15 +114,7 @@ export default function BookingsPage() {
     loadData();
   }, []);
 
-  const validateBooking = (start, end, resourceName) => {
-    if (!start) {
-      setBookingError("Start time is required");
-      return false;
-    }
-    const startDate = new Date(start);
-    if (startDate < new Date()) {
-      setBookingError("Cannot book past dates");
-      return false;
+  
     }
     if (!end) {
       setBookingError("End time is required");
