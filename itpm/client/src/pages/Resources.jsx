@@ -345,21 +345,7 @@ export default function ResourcesPage() {
         </div>
       </div>
 
-      <Section title="🎯 Book Resources - Quick View">
-        {error && <div className="alert alert-error">{error}</div>}
-        {activeResources.length === 0 ? (
-          <div className="empty-state">
-            <p className="empty-icon">📦</p>
-            <p className="empty-text">No resources available</p>
-          </div>
-        ) : (
-          <div className="resource-cards-grid">
-            {activeResources.map((r) => {
-              const upcomingBookings = bookings
-                .filter((b) => b.resourceName === r.name && new Date(b.end) >= new Date())
-                .sort((a, b) => new Date(a.start) - new Date(b.start));
-              
-              return (
+     
                 <div 
                   key={r._id || r.name} 
                   className="resource-card-full"
