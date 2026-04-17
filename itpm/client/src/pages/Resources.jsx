@@ -283,7 +283,88 @@ export default function ResourcesPage() {
   if (loading) return <div className="page-loading">⏳ Loading resources...</div>;
 
   // Admin view
-  
+  if (user && user.role === "admin") {
+    return (
+      <div className="page">
+        <BookingCalendar bookings={bookings} />
+        <Section title="Create Resource">
+          {error && <div className="alert alert-error">{error}</div>}
+          <form className="form-grid" onSubmit={createResource}>
+            <div className="form-group">
+              <label>🎯 Resource Name *</label>
+              <input name="name" placeholder="e.g., Study Room" required />
+            </div>
+            <button type="submit" className="btn-primary">➕ Add Resource</button>
+          </form>
+        </Section>
+
+        <Section title="Manage Resources">
+          {resources.length === 0 ? (
+            <p className="empty">No resources found</p>
+          ) : (
+            <div className="items-grid">
+              {resources.map((r) => (
+                <div key={r._id} className="item-card">
+                  <h3>{r.name}</h3>
+                  <p className="item-qty">Status: {r.active ? "Active" : "Inactive"}</p>
+                  <button
+                    className={r.active ? "btn-secondary" : "btn-primary"}
+                    onClick={() => toggleResource(r._id, !r.active)}
+                  >
+                    {r.active ? "Deactivate" : "Activate"}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </Section>
+      </div>
+    );
+  }
+
+  // Student view
+  const activeResources = resources.filter((r) => r.active !== false);
+
+  return (
+    <div className="page">
+      {/* Stats Section */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon">📦</div>
+          <div className="stat-content">
+            <p className="stat-value">{activeResources.length}</p>
+            <p className="stat-label">Available Resources</p>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon">📅</div>
+          <div className="stat-content">
+            <p className="stat-value">{bookings.filter(b => b.studentId?._id === user?._id || b.studentId === user?._id).length}</p>
+            <p className="stat-label">Your Bookings</p>
+          </div>
+        </div>
+      </div>
+
+     
+                <div 
+                  key={r._id || r.name} 
+                  className="resource-card-full"
+                  style={{ borderTopColor: resourceColor[r.name] || '#3b82f6' }}
+                >
+                  {/* Header with emoji and name */}
+                  <div className="card-top">
+                    <div className="resource-emoji-xl">
+                      {resourceEmoji[r.name] || "✅"}
+                    </div>
+                    <div className="resource-info">
+                      <h3>{r.name}</h3>
+                      {upcomingBookings.length === 0 ? (
+                        <p className="status-available">✨ Available Now</p>
+                      ) : (
+                        <p className="status-booked">⏳ Next booking at {new Date(upcomingBookings[0].start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
+                      )}
+                    </div>
+                  </div>
 
                   {/* Upcoming bookings timeline */}
                   {upcomingBookings.length > 0 && (
