@@ -154,57 +154,7 @@ export default function ResourcesPage() {
       ]);
       
       // Detect role change and reload page
-      if (prevRole && prevRole !== me.role) {
-        window.location.reload();
-        return;
-      }
       
-      setPrevRole(me.role);
-      setUser(me);
-      setBookings(bkg);
-      const hasActive = res.some((r) => r.active !== false);
-      setResources(hasActive ? res : defaultResources.map((name) => ({ name, active: true })));
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    if (!prevRole) return;
-    const interval = setInterval(loadData, 5000);
-    return () => clearInterval(interval);
-  }, [prevRole]);
-
-  const handleBookClick = (resource) => {
-    setSelectedResource(resource);
-    setBookingError("");
-    setBookingData({ start: "", end: "" });
-  };
-
-  const validateBooking = (start, end) => {
-    if (!start) {
-      setBookingError("Start time is required");
-      return false;
-    }
-    const startDate = new Date(start);
-    if (startDate < new Date()) {
-      setBookingError("Cannot book past dates");
-      return false;
-    }
-    if (!end) {
-      setBookingError("End time is required");
-      return false;
-    }
-    const endDate = new Date(end);
-    if (endDate <= startDate) {
-      setBookingError("End time must be after start time");
-      return false;
     }
     const durationMinutes = (endDate - startDate) / (1000 * 60);
     if (durationMinutes < 15) {
