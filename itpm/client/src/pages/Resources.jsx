@@ -455,27 +455,4 @@ export default function ResourcesPage() {
             <p className="empty-subtext">Book a resource from the quick view cards above</p>
           </div>
         ) : (
-          <div className="my-bookings-grid">
-            {bookings
-              .filter(b => b.studentId?._id === user?._id || b.studentId === user?._id)
-              .sort((a, b) => new Date(b.start) - new Date(a.start))
-              .map((b) => (
-                <div key={b._id} className="my-booking-card">
-                  <div className="booking-badge">
-                    <span className="emoji">{resourceEmoji[b.resourceName] || "✅"}</span>
-                    <h3>{b.resourceName}</h3>
-                  </div>
-                  <div className="booking-details">
-                    <p className="booking-date">📅 {new Date(b.start).toLocaleDateString()}</p>
-                    <p className="booking-slot">🕒 {new Date(b.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} → {new Date(b.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
-                  </div>
-                </div>
-              ))}
-          </div>
-        )}
-      </Section>
-      
-      <BookingCalendar bookings={bookings} />
-    </div>
-  );
-}
+          
