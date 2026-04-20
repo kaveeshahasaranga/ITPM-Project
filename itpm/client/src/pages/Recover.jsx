@@ -71,4 +71,52 @@ export default function Recover() {
           <p>Enter your email and new password to reset</p>
         </div>
 
- 
+        <form className="auth-form" onSubmit={submit}>
+          {error && <p className="error">{error}</p>}
+          {success && <p className="success">{success}</p>}
+
+          <div className="form-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="At least 6 chars (uppercase, lowercase, digit)"
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label>Confirm Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Re-enter your password"
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn-primary" disabled={loading}>
+            {loading ? "Resetting..." : "Reset Password"}
+          </button>
+        </form>
+
+        <p className="auth-footer">
+          Remember your password? <Link to="/">Back to login</Link>
+        </p>
+      </div>
+    </div>
+  );
+}
