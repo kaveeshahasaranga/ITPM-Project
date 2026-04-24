@@ -1,22 +1,6 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api.js";
 import Section from "../components/Section.jsx";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { format, parse, startOfWeek, getDay } from "date-fns";
-import { enUS } from "date-fns/locale";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-
-const locales = {
-  "en-US": enUS,
-};
-
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-});
 
 const defaultResources = [
   "Laundry Machine",
@@ -91,46 +75,6 @@ const resourceColor = {
   "Seminar Hall": "#8b5cf6",
   "First Aid Kit": "#ef4444",
   "Carrom Board": "#f59e0b"
-};
-
-const BookingCalendar = ({ bookings }) => {
-  const events = bookings.map((b) => ({
-    title: `${b.resourceName} - ${b.studentId?.name || "Student"}`,
-    start: new Date(b.start),
-    end: new Date(b.end),
-    resourceName: b.resourceName,
-  }));
-
-  const eventPropGetter = (event) => {
-    const backgroundColor = resourceColor[event.resourceName] || "#3b82f6";
-    return {
-      style: {
-        backgroundColor,
-        borderRadius: "6px",
-        border: "none",
-        color: "white",
-        fontWeight: "500",
-        padding: "2px 5px",
-      },
-    };
-  };
-
-  return (
-    <Section title="📅 Resource Bookings Calendar">
-      <div style={{ height: 600, padding: "20px", backgroundColor: "var(--bg-card, #ffffff)", borderRadius: "12px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)" }} className="calendar-container">
-        <Calendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          style={{ height: "100%", fontFamily: "inherit" }}
-          eventPropGetter={eventPropGetter}
-          views={["month", "week", "day"]}
-          defaultView="week"
-        />
-      </div>
-    </Section>
-  );
 };
 
 export default function ResourcesPage() {
@@ -286,7 +230,6 @@ export default function ResourcesPage() {
   if (user && user.role === "admin") {
     return (
       <div className="page">
-        <BookingCalendar bookings={bookings} />
         <Section title="Create Resource">
           {error && <div className="alert alert-error">{error}</div>}
           <form className="form-grid" onSubmit={createResource}>
@@ -345,7 +288,21 @@ export default function ResourcesPage() {
         </div>
       </div>
 
-     
+      <Section title="🎯 Book Resources - Quick View">
+        {error && <div className="alert alert-error">{error}</div>}
+        {activeResources.length === 0 ? (
+          <div className="empty-state">
+            <p className="empty-icon">📦</p>
+            <p className="empty-text">No resources available</p>
+          </div>
+        ) : (
+          <div className="resource-cards-grid">
+            {activeResources.map((r) => {
+              const upcomingBookings = bookings
+                .filter((b) => b.resourceName === r.name && new Date(b.end) >= new Date())
+                .sort((a, b) => new Date(a.start) - new Date(b.start));
+              
+              return (
                 <div 
                   key={r._id || r.name} 
                   className="resource-card-full"
@@ -474,8 +431,6 @@ export default function ResourcesPage() {
           </div>
         )}
       </Section>
-      
-      <BookingCalendar bookings={bookings} />
     </div>
   );
 }
