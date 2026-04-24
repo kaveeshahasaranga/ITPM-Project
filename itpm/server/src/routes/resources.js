@@ -4,6 +4,17 @@ import { requireAuth, requireApproved } from "../middleware/auth.js";
 import { requireRole } from "../middleware/roles.js";
 import Resource from "../models/Resource.js";
 
+const router = Router();
+
+router.get("/", requireAuth, requireApproved, async (_req, res) => {
+  const resources = await Resource.find().sort({ name: 1 });
+  res.json(resources);
+});
+
+const createSchema = z.object({
+  name: z.string().min(2).max(100),
+  active: z.boolean().optional()
+});
 
 router.post("/", requireAuth, requireRole("admin"), async (req, res) => {
   const parse = createSchema.safeParse(req.body);
