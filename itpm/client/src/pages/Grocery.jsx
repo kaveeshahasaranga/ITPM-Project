@@ -455,7 +455,7 @@ export default function GroceryPage() {
 
   return (
     <div className="page">
-      <Section title="  How to Request from Available Stocks">
+      <Section title="� How to Request from Available Stocks">
         <div style={{ backgroundColor: "#f3f4f6", padding: "1rem", borderRadius: "0.5rem", fontSize: "0.95rem" }}>
           <p><strong>✅ You can request ANY quantity you need!</strong></p>
           <p style={{ marginTop: "0.5rem" }}>Examples:</p>
@@ -469,7 +469,7 @@ export default function GroceryPage() {
         </div>
       </Section>
 
-      <Section title=" 🛒 Available Stocks">
+      <Section title="�🛒 Available Stocks">
         {stocks.length === 0 ? (
           <p className="empty">No items in stock right now</p>
         ) : (
