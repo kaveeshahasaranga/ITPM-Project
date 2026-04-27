@@ -302,21 +302,7 @@ export default function ResourcesPage() {
                 .filter((b) => b.resourceName === r.name && new Date(b.end) >= new Date())
                 .sort((a, b) => new Date(a.start) - new Date(b.start));
               
-              return (
-                <div 
-                  key={r._id || r.name} 
-                  className="resource-card-full"
-                  style={{ borderTopColor: resourceColor[r.name] || '#3b82f6' }}
-                >
-                  {/* Header with emoji and name */}
-                  <div className="card-top">
-                    <div className="resource-emoji-xl">
-                      {resourceEmoji[r.name] || "✅"}
-                    </div>
-                    <div className="resource-info">
-                      <h3>{r.name}</h3>
-                      {upcomingBookings.length === 0 ? (
-                        <p className="status-available">✨ Available Now</p>
+             
                       ) : (
                         <p className="status-booked">⏳ Next booking at {new Date(upcomingBookings[0].start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</p>
                       )}
