@@ -323,7 +323,19 @@ export default function ResourcesPage() {
                     </div>
                   </div>
 
-                  length > 3 && (
+                  {/* Upcoming bookings timeline */}
+                  {upcomingBookings.length > 0 && (
+                    <div className="upcoming-bookings">
+                      <p className="timeline-title">📅 Upcoming Bookings:</p>
+                      {upcomingBookings.slice(0, 3).map((booking, idx) => (
+                        <div key={idx} className="booking-slot">
+                          <span className="time">
+                            {new Date(booking.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - {new Date(booking.end).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                          </span>
+                          <span className="booked-by">By: {booking.studentId?.name || "Student"}</span>
+                        </div>
+                      ))}
+                      {upcomingBookings.length > 3 && (
                         <p className="more-bookings">+{upcomingBookings.length - 3} more bookings</p>
                       )}
                     </div>
