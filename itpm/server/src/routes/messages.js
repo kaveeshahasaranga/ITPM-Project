@@ -173,29 +173,6 @@ router.delete("/:id", requireAuth, async (req, res) => {
         let canDelete = false;
 
         // 1. Sender can delete
-        if (String(message.sender) === String(req.user._id)) {
-            canDelete = true;
-        }
 
-        // 2. Recipient can delete (if specific recipient)
-        if (message.recipient && String(message.recipient) === String(req.user._id)) {
-            canDelete = true;
-        }
-
-        // 3. If message is to admin (recipient null) and user is admin
-        if (!message.recipient && message.isStudentToAdmin && req.user.role === "admin") {
-            canDelete = true;
-        }
-
-        if (!canDelete) {
-            return res.status(403).json({ message: "Access denied" });
-        }
-
-        await message.deleteOne();
-        res.json({ message: "Message deleted" });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-});
 
 export default router;
