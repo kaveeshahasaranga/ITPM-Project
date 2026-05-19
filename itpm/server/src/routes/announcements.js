@@ -15,4 +15,16 @@ router.get("/", requireAuth, requireApproved, async (_req, res) => {
   res.json(announcements);
 });
 
+router.post("/", requireAuth, requireRole("admin"), async (req, res) => {
+  const parse = schema.safeParse(req.body);
+  if (!parse.success) {
+    return res.status(400).json({ message: "Invalid input" });
+  }
+  const announcement = await Announcement.create({
+    adminId: req.user._id,
+    message: parse.data.message
+  });
+  res.status(201).json(announcement);
+});
 
+export default router;
